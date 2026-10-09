@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ConvertLab — Unit Converter for Engineers</title>
+  <meta name="description" content="Fast, precise unit conversion for engineers: length, mass, pressure, energy and temperature.">
+  <meta name="theme-color" content="#07090c">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="container topbar__inner">
+      <a class="logo" href="#top" aria-label="ConvertLab home">
+        <span class="logo__glyph" aria-hidden="true">&gt;</span>Convert<span class="accent">Lab</span>
+      </a>
+      <nav class="nav" aria-label="Main">
+        <a href="#converter">Converter</a>
+        <a href="#pricing">Pricing</a>
+        <a class="btn btn--small btn--primary" href="#pricing">Get Pro</a>
+        <a class="btn btn--small btn--outline" href="https://ardankani.github.io" target="_blank" rel="noopener noreferrer">Portfolio<span class="ext" aria-hidden="true">↗</span><span class="sr-only"> (opens in a new tab)</span></a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="hero container">
+      <p class="eyebrow">// UNIT CONVERSION ENGINE v1.0</p>
+      <h1 class="hero__title">Convert anything.<br>Precisely.<span class="cursor" aria-hidden="true">_</span></h1>
+      <p class="hero__sub">Fast, accurate conversions for length, mass, pressure, energy and temperature. Built for engineers who need the number, not the noise.</p>
+      <div class="hero__cta">
+        <a class="btn btn--primary" href="#converter">Start converting</a>
+        <a class="btn btn--ghost" href="#pricing">View pricing</a>
+      </div>
+    </section>
+
+    <section id="converter" class="container section" aria-labelledby="converter-title">
+      <div class="section__head">
+        <p class="eyebrow">01 / CONVERTER</p>
+        <h2 id="converter-title">Converter</h2>
+      </div>
+
+      <div class="card converter">
+        <div class="tabs" role="tablist" aria-label="Unit categories">
+          <button class="tab" role="tab" id="tab-length" data-cat="length" aria-controls="panel" aria-selected="true">Length</button>
+          <button class="tab" role="tab" id="tab-mass" data-cat="mass" aria-controls="panel" aria-selected="false" tabindex="-1">Mass</button>
+          <button class="tab" role="tab" id="tab-pressure" data-cat="pressure" aria-controls="panel" aria-selected="false" tabindex="-1">Pressure</button>
+          <button class="tab" role="tab" id="tab-energy" data-cat="energy" aria-controls="panel" aria-selected="false" tabindex="-1">Energy</button>
+          <button class="tab" role="tab" id="tab-temperature" data-cat="temperature" aria-controls="panel" aria-selected="false" tabindex="-1">Temperature</button>
+        </div>
+
+        <div id="panel" class="panel" role="tabpanel" aria-labelledby="tab-length">
+          <div class="io">
+            <div class="field">
+              <label class="label" for="from-value">FROM</label>
+              <div class="field__row">
+                <input id="from-value" class="num" type="number" inputmode="decimal" step="any" value="1" autocomplete="off">
+                <select id="from-unit" class="unit" aria-label="From unit"></select>
+              </div>
+            </div>
+
+            <button id="swap" class="swap" type="button" aria-label="Swap units" title="Swap units">&#8644;</button>
+
+            <div class="field">
+              <label class="label" for="to-value">TO</label>
+              <div class="field__row">
+                <output id="to-value" class="num num--out" for="from-value from-unit to-unit" aria-live="polite">—</output>
+                <select id="to-unit" class="unit" aria-label="To unit"></select>
+              </div>
+            </div>
+          </div>
+
+          <p id="formula" class="formula">—</p>
+
+          <div class="all">
+            <p class="label">ALL UNITS</p>
+            <ul id="all-units" class="all__grid"></ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="pricing" class="container section" aria-labelledby="pricing-title">
+      <div class="section__head">
+        <p class="eyebrow">02 / PRICING</p>
+        <h2 id="pricing-title">Simple pricing</h2>
+      </div>
+
+      <div class="pricing">
+        <article class="card plan">
+          <p class="plan__name">STUDENT</p>
+          <p class="plan__price"><span class="num">$0</span></p>
+          <p class="plan__desc">Everything you need for coursework and quick checks.</p>
+          <ul class="plan__list">
+            <li>All 5 unit categories</li>
+            <li>Live conversion</li>
+            <li>6 significant digits</li>
+          </ul>
+          <a class="btn btn--ghost btn--block" href="#converter">Start free</a>
+        </article>
+
+        <article class="card plan plan--pro">
+          <p class="plan__badge">RECOMMENDED</p>
+          <p class="plan__name">PRO</p>
+          <p class="plan__price"><span class="num">$4</span><span class="plan__per">/month</span></p>
+          <p class="plan__desc">For working engineers who convert all day.</p>
+          <ul class="plan__list">
+            <li>Everything in Student</li>
+            <li>Up to 15 significant digits</li>
+            <li>Conversion history</li>
+            <li>Custom units &amp; presets</li>
+          </ul>
+          <a class="btn btn--primary btn--block" href="#pricing">Go Pro</a>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer__inner">
+      <p>&copy; <span id="year">2026</span> ConvertLab &middot; built for engineers</p>
+      <a class="footer__link" href="https://ardankani.github.io" target="_blank" rel="noopener noreferrer">Portfolio<span class="ext" aria-hidden="true">↗</span><span class="sr-only"> (opens in a new tab)</span></a>
+    </div>
+  </footer>
+</body>
+</html>
