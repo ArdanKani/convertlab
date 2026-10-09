@@ -4,8 +4,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>ConvertLab — Unit Converter for Engineers</title>
-  <meta name="description" content="Fast, precise unit conversion for engineers: length, mass, pressure, energy and temperature.">
+  <meta name="description" content="Fast, precise unit conversion for engineers: length, mass, pressure, energy, temperature and wind speed, plus a wind power calculator for turbine output.">
   <meta name="theme-color" content="#07090c">
+  <script>
+    // Apply a saved theme before first paint (no flash). Without one, CSS follows the system setting.
+    try {
+      var t = localStorage.getItem("convertlab:theme");
+      if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t);
+    } catch (e) { /* storage unavailable */ }
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
@@ -13,6 +20,7 @@
   <script src="app.js" defer></script>
 </head>
 <body>
+  <canvas id="bg" aria-hidden="true"></canvas>
   <header class="topbar">
     <div class="container topbar__inner">
       <a class="logo" href="#top" aria-label="ConvertLab home">
@@ -23,6 +31,10 @@
         <a href="#pricing">Pricing</a>
         <a class="btn btn--small btn--primary" href="#pricing">Get Pro</a>
         <a class="btn btn--small btn--outline" href="https://ardankani.github.io" target="_blank" rel="noopener noreferrer">Portfolio<span class="ext" aria-hidden="true">↗</span><span class="sr-only"> (opens in a new tab)</span></a>
+        <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Switch theme" title="Switch theme">
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+        </button>
       </nav>
     </div>
   </header>
@@ -31,7 +43,7 @@
     <section class="hero container">
       <p class="eyebrow">// UNIT CONVERSION ENGINE v1.0</p>
       <h1 class="hero__title">Convert anything.<br>Precisely.<span class="cursor" aria-hidden="true">_</span></h1>
-      <p class="hero__sub">Fast, accurate conversions for length, mass, pressure, energy and temperature. Built for engineers who need the number, not the noise.</p>
+      <p class="hero__sub">Fast, accurate conversions for length, mass, pressure, energy, temperature and wind speed — plus a wind power calculator for turbine output. Built for engineers who need the number, not the noise.</p>
       <div class="hero__cta">
         <a class="btn btn--primary" href="#converter">Start converting</a>
         <a class="btn btn--ghost" href="#pricing">View pricing</a>
@@ -51,6 +63,8 @@
           <button class="tab" role="tab" id="tab-pressure" data-cat="pressure" aria-controls="panel" aria-selected="false" tabindex="-1">Pressure</button>
           <button class="tab" role="tab" id="tab-energy" data-cat="energy" aria-controls="panel" aria-selected="false" tabindex="-1">Energy</button>
           <button class="tab" role="tab" id="tab-temperature" data-cat="temperature" aria-controls="panel" aria-selected="false" tabindex="-1">Temperature</button>
+          <button class="tab" role="tab" id="tab-speed" data-cat="speed" aria-controls="panel" aria-selected="false" tabindex="-1">Wind speed</button>
+          <button class="tab" role="tab" id="tab-windpower" data-cat="windpower" aria-controls="panel-power" aria-selected="false" tabindex="-1">Wind power</button>
         </div>
 
         <div id="panel" class="panel" role="tabpanel" aria-labelledby="tab-length">
@@ -81,6 +95,64 @@
             <ul id="all-units" class="all__grid"></ul>
           </div>
         </div>
+
+        <div id="panel-power" class="panel" role="tabpanel" aria-labelledby="tab-windpower" hidden>
+          <div class="power__inputs">
+            <div class="field">
+              <label class="label" for="p-rho">AIR DENSITY ρ</label>
+              <div class="field__row">
+                <input id="p-rho" class="num" type="number" inputmode="decimal" step="any" min="0" value="1.225" autocomplete="off">
+                <span class="suffix">kg/m³</span>
+              </div>
+            </div>
+            <div class="field">
+              <label class="label" for="p-d">ROTOR DIAMETER D</label>
+              <div class="field__row">
+                <input id="p-d" class="num" type="number" inputmode="decimal" step="any" min="0" value="100" autocomplete="off">
+                <span class="suffix">m</span>
+              </div>
+            </div>
+            <div class="field">
+              <label class="label" for="p-v">WIND SPEED v</label>
+              <div class="field__row">
+                <input id="p-v" class="num" type="number" inputmode="decimal" step="any" min="0" value="10" autocomplete="off">
+                <span class="suffix">m/s</span>
+              </div>
+            </div>
+            <div class="field">
+              <label class="label" for="p-cp">POWER COEFFICIENT Cp</label>
+              <div class="field__row">
+                <input id="p-cp" class="num" type="number" inputmode="decimal" step="any" min="0" value="0.45" autocomplete="off">
+                <span class="suffix">—</span>
+              </div>
+            </div>
+          </div>
+
+          <p id="betz-warn" class="warn" role="status" hidden></p>
+
+          <p class="power__area"><span class="label">SWEPT AREA A</span><span class="num"><span id="p-area">—</span> m²</span></p>
+
+          <div class="power__results" aria-live="polite">
+            <div class="result">
+              <p class="label">WIND POWER IN THE AIR · P<sub>wind</sub></p>
+              <ul class="all__grid result__grid">
+                <li><span class="v" id="pw-w">—</span><span class="u">W</span></li>
+                <li><span class="v" id="pw-kw">—</span><span class="u">kW</span></li>
+                <li><span class="v" id="pw-mw">—</span><span class="u">MW</span></li>
+              </ul>
+            </div>
+            <div class="result result--main">
+              <p class="label">TURBINE OUTPUT · P = P<sub>wind</sub>·Cp</p>
+              <ul class="all__grid result__grid">
+                <li><span class="v" id="pt-w">—</span><span class="u">W</span></li>
+                <li><span class="v" id="pt-kw">—</span><span class="u">kW</span></li>
+                <li><span class="v" id="pt-mw">—</span><span class="u">MW</span></li>
+              </ul>
+            </div>
+          </div>
+
+          <p id="p-formula" class="formula">A = π(D/2)²  ·  P<sub>wind</sub> = ½ρAv³  ·  P = Cp·P<sub>wind</sub></p>
+        </div>
       </div>
     </section>
 
@@ -96,7 +168,8 @@
           <p class="plan__price"><span class="num">$0</span></p>
           <p class="plan__desc">Everything you need for coursework and quick checks.</p>
           <ul class="plan__list">
-            <li>All 5 unit categories</li>
+            <li>All 6 converter categories</li>
+            <li>Wind power calculator</li>
             <li>Live conversion</li>
             <li>6 significant digits</li>
           </ul>
